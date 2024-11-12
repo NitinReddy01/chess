@@ -18,11 +18,12 @@ app.use(session({
     saveUninitialized:false,
     cookie:{secure:false,maxAge:24*60*60*1000}
 }))
+InitPassport();
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
 
-InitPassport();
+
 app.use('/auth',authRouter);
 
 app.get('/success',(req,res)=>{

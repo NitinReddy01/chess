@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { db } from './db';
 
 
 dotenv.config();
@@ -18,17 +19,34 @@ export  function InitPassport(){
         clientSecret:GOOGLE_CLIENT_SECRET,
         callbackURL:'/auth/google/callback'
     },async (accessToken,refreshToken,profile,done)=>{
-        console.log(profile);
-        done(null,{id:"asd"});
+        const email = profile.emails?profile.emails[0].value:"test@gmail.com"
+        const imageUrl = profile._json.picture || "sample-image"
+        try {
+            const user = await db.user.upsert({
+                create:{
+                    name:profile.displayName,
+                    provider:"GOOGLE",
+                    email,
+                    image:imageUrl
+                },
+                update:{
+                    name:profile.displayName
+                },
+                where:{
+                    email
+                }
+            });
+            done(null,{id:user.id,email:user.email,name:user.name,image:imageUrl});
+        } catch (error) {
+            console.log(error);
+        }
     }))
 
     passport.serializeUser(function (user,done){
-        console.log(user,"serialize");
         done(null,user)
     })
 
-    passport.deserializeUser(function (id,done){
-        console.log(id);
-        done(null,{name:"nitin"});
+    passport.deserializeUser(function (user:Express.User,done){
+        done(null,user);
     })
 }

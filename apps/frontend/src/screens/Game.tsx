@@ -26,7 +26,7 @@ export default function Game() {
 
             switch (message.type) {
                 case START_GAME:
-                    setPlayerColor(message.payload.color);
+                    setPlayerColor(message.payload.player1);
                     setBoard(chess.board());
                     setGameStarted(true);
                     break;
@@ -51,7 +51,7 @@ export default function Game() {
   return (
     <div className="flex justify-center p-8">
       <div>
-        <ChessBoard socket={socket} board={board} chess={chess} playerColor={playerColor} setBoard={setBoard} />
+        <ChessBoard socket={socket} board={board} chess={chess} playerColor={playerColor === "white"?"w":'b'} setBoard={setBoard} />
       </div>
       {!gameStarted &&       <div>
         <button className="text-white" onClick={()=>{

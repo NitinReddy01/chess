@@ -1,39 +1,68 @@
 import { WebSocket } from "ws";
 import { Game } from "./Game";
-import { MOVE, START_GAME } from "./utils";
+import { INIT_GAME, JOIN_GAME, MOVE, User } from "./utils";
+import { socketManager } from "./SocketManager";
 
 export class GameManager{
     private games:Game[];
-    private users:WebSocket[]=[]
-    private waitingUser : WebSocket | null = null;
+    private waitingGameId : string | null = null;
 
     constructor(){
         this.games = [];
     }
 
-    addUser(socket:WebSocket) {
-        this.users.push(socket);
-        this.addHandler(socket);
+    addUser(user:User) {
+        this.addHandler(user);
     }
 
-    private addHandler(socket:WebSocket) {
-        socket.on('message',(data)=>{
+    private addHandler(user:User) {
+        user.socket.on('message',(data)=>{
             const message = JSON.parse(data.toString());
 
             switch (message.type) {
-                case START_GAME:
-                    if(this.waitingUser) {
-                        const game = new Game(this.waitingUser,socket);
-                        this.games.push(game);
-                        this.waitingUser = null;
+                case INIT_GAME:
+                    if(this.waitingGameId) {
+                        socketManager.addUser(this.waitingGameId,user);
+                        const game = this.games.find(game=>game.gameId === this.waitingGameId);
+                        if(!game) {
+                            return;
+                        }
+                        if(game.whitePlayer?.id === user.id) {
+                            return ;
+                        }
+                        game.startGame(user);
+                        this.waitingGameId = null;
                     } else {
-                        this.waitingUser = socket;
+                        const game = new Game(user,null,10*60);
+                        this.games.push(game);
+                        this.waitingGameId = game.gameId;
+                        socketManager.addUser(game.gameId,user)
                     }
                     break;
+                case JOIN_GAME:
+                    {
+                        const gameId = message.payload.gameId;
+                        if(!gameId) {
+                            return ;
+                        }
+                        const availableGame = this.games.find(game=>game.gameId === gameId);
+
+                    }   
+
+                    break;
                 case MOVE:
-                    const game = this.games.find(game=>(game.player1 === socket || game.player2 === socket ));
-                    if(game) {
-                        game.move(socket,message.payload.move);
+                    const gameId = message.payload.gameId;
+                    if(!gameId) {
+                        return ;
+                    }
+                    const game = this.games.find(game=>game.gameId === gameId);
+                    if(!game) {
+                        return ;
+                    }
+                    const move = message.payload.move;
+                    game.move(user,move);
+                    if(game.result) {
+                        // remove game from games
                     }
                     break;
                 default:
@@ -43,10 +72,7 @@ export class GameManager{
     }
 
     removeUser(socket:WebSocket) {
-        this.users = this.users.filter(user=>user!==socket);
-
+        console.log("remove");
     }
-
-    
 
 }
