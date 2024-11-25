@@ -1,0 +1,8 @@
+export const black800 = "#232323"
+export const black500 = "#33322F"
+export const black200 = "#3E3C3A"
+export const gray = "#696969"
+export const green500 = "#91B454"
+export const green800 = "#7D9457"
+export const neutral800 = "#FFF"
+export const neutral600 = "#EBEBD0"

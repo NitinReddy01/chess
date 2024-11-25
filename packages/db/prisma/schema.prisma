@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  email String @unique
+  name String
+  createdAt DateTime @default(now())
+  provider AuthProvider
+  lastSignIn DateTime?
+  image String @default("https://lvhdufdjeqcqrevmvzzm.supabase.co/storage/v1/object/public/chess/wp.png")
+  whiteGames Game[] @relation("WhiteGames")
+  blackGames Game[] @relation("BlackGames")
+}
+
+model Game{
+  id String @id @default(uuid())
+  whitePlayerId Int
+  blackPlayerId Int
+  whitePlayer User @relation("WhiteGames",fields: [whitePlayerId],references: [id])
+  blackPlayer User @relation("BlackGames",fields: [blackPlayerId],references: [id])
+  board String
+  status GameStatus
+  startedAt DateTime @default(now())
+  result GameResult?
+  moves Move[] @relation("moves")
+}
+
+model Move{
+  id Int @id @default(autoincrement())
+  gameId String
+  game Game @relation("moves",fields: [gameId],references: [id])
+  from String
+  to String
+  timeStamp DateTime
+}
+
+enum AuthProvider {
+  GOOGLE
+  GUEST
+}
+
+enum GameStatus {
+  completed
+  in_progress
+  time_up
+  aborted
+  player_exit
+}
+
+enum GameResult {
+  white_wins
+  black_wins
+  draw
+}

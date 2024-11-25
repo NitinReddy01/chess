@@ -1,0 +1,14 @@
+export const chessLogo = require('../assets/images/wp.png');
+export const wp = require('../assets/images/wp.png');
+export const wr = require('../assets/images/wr.png');
+export const wq = require('../assets/images/wq.png');
+export const wb = require('../assets/images/wb.png');
+export const wn = require('../assets/images/wn.png');
+export const wk = require('../assets/images/wk.png');
+export const bp = require('../assets/images/bp.png');
+export const bn = require('../assets/images/bn.png');
+export const br = require('../assets/images/br.png');
+export const bk = require('../assets/images/bk.png');
+export const bb = require('../assets/images/bb.png');
+export const bq = require('../assets/images/bq.png');
+export const tribar = require('../assets/images/tribar.png');
